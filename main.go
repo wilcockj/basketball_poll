@@ -75,6 +75,7 @@ func submitHandler(w http.ResponseWriter, r *http.Request) {
 	name := r.FormValue("name")
 	date := time.Now().Format("2006-01-02")
 
+	fmt.Println("got name", name)
 	// Check if the name already exists for the current date
 	var exists bool
 	err := db.QueryRow("SELECT EXISTS(SELECT 1 FROM players WHERE name = ? AND date = ?)", name, date).Scan(&exists)
