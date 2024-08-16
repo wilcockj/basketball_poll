@@ -52,7 +52,7 @@ func main() {
 		basePath = "/"
 	}
 
-	r.HandleFunc(basePath, homeHandler).Methods("GET")
+	r.HandleFunc("/", homeHandler).Methods("GET")
 	r.HandleFunc(basePath+"submit", submitHandler).Methods("POST")
 	r.HandleFunc(basePath+"players", playersHandler).Methods("GET")
 
