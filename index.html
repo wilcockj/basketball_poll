@@ -5,14 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Basketball Attendance</title>
     <script src="https://unpkg.com/htmx.org@1.9.2"></script>
+    <script>
+        // This base path can be dynamically set by the Go server
+        window.BASE_PATH = "{{.BasePath}}"; // This will be replaced by the Go server
+    </script>
 </head>
 <body>
     <h1>Are you playing basketball today?</h1>
-    <form hx-post="/submit" hx-target="#players" hx-swap="outerHTML">
+    <form id="attendanceForm" hx-target="#players" hx-swap="outerHTML" hx-post="{{.BasePath}}submit">
         <input type="text" name="name" id="name" placeholder="Enter your name" required>
         <button type="submit">Submit</button>
     </form>
-    <div id="players" hx-get="/players" hx-trigger="load"></div>
+    <div id="players" hx-get="{{.BasePath}}players" hx-trigger="load"></div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -20,6 +24,7 @@
             if (name) {
                 document.getElementById("name").value = name;
             }
+
         });
 
         function getCookie(name) {
@@ -35,3 +40,4 @@
     </script>
 </body>
 </html>
+

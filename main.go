@@ -10,6 +10,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -22,9 +23,10 @@ type Player struct {
 }
 
 type PageData struct {
-	Players []Player
-	Date    string
-	Message string
+	Players  []Player
+	Date     string
+	Message  string
+	BasePath string
 }
 
 var db *sql.DB
@@ -37,15 +39,22 @@ func main() {
 		log.Fatal(err)
 	}
 	defer db.Close()
-
+	go resetDatabaseDaily()
 	createTable()
 
 	templates = template.Must(template.ParseFiles("index.html", "players.html"))
 
 	r := mux.NewRouter()
-	r.HandleFunc("/", homeHandler).Methods("GET")
-	r.HandleFunc("/submit", submitHandler).Methods("POST")
-	r.HandleFunc("/players", playersHandler).Methods("GET")
+
+	// Get the base path from environment variable or use "/"
+	basePath := os.Getenv("BASE_PATH")
+	if basePath == "" {
+		basePath = "/"
+	}
+
+	r.HandleFunc(basePath, homeHandler).Methods("GET")
+	r.HandleFunc(basePath+"submit", submitHandler).Methods("POST")
+	r.HandleFunc(basePath+"players", playersHandler).Methods("GET")
 
 	fmt.Println("Server is running on http://localhost:8098")
 	log.Fatal(http.ListenAndServe(":8098", r))
@@ -65,7 +74,16 @@ func createTable() {
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
-	err := templates.ExecuteTemplate(w, "index.html", nil)
+	basePath := os.Getenv("BASE_PATH")
+	if basePath == "" {
+		basePath = "/"
+	}
+
+	data := PageData{
+		BasePath: basePath,
+	}
+
+	err := templates.ExecuteTemplate(w, "index.html", data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -130,14 +148,36 @@ func playersHandlerWithMessage(w http.ResponseWriter, r *http.Request, message s
 		players = append(players, p)
 	}
 
+	basePath := os.Getenv("BASE_PATH")
+	if basePath == "" {
+		basePath = "/"
+	}
+
 	pageData := PageData{
-		Players: players,
-		Date:    date,
-		Message: message,
+		Players:  players,
+		Date:     date,
+		Message:  message,
+		BasePath: basePath,
 	}
 
 	err = templates.ExecuteTemplate(w, "players.html", pageData)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+func resetDatabaseDaily() {
+	for {
+		now := time.Now()
+		next := now.AddDate(0, 0, 1)
+		next = time.Date(next.Year(), next.Month(), next.Day(), 0, 0, 0, 0, next.Location())
+		time.Sleep(time.Until(next))
+
+		_, err := db.Exec("DELETE FROM players WHERE date < ?", time.Now().Format("2006-01-02"))
+		if err != nil {
+			log.Println("Error resetting database:", err)
+		} else {
+			log.Println("Database reset for the new day")
+		}
 	}
 }
