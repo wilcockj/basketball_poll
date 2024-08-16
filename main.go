@@ -47,8 +47,8 @@ func main() {
 	r.HandleFunc("/submit", submitHandler).Methods("POST")
 	r.HandleFunc("/players", playersHandler).Methods("GET")
 
-	fmt.Println("Server is running on http://localhost:8080")
-	log.Fatal(http.ListenAndServe(":8080", r))
+	fmt.Println("Server is running on http://localhost:8098")
+	log.Fatal(http.ListenAndServe(":8098", r))
 }
 
 func createTable() {
