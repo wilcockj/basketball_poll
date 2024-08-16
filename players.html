@@ -1,0 +1,11 @@
+<div id="players">
+    <h2>Players for today ({{.Date}}):</h2>
+    {{if .Message}}
+        <p><strong>{{.Message}}</strong></p>
+    {{end}}
+    <ul>
+        {{range .Players}}
+            <li>{{.Name}}</li>
+        {{end}}
+    </ul>
+</div>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basketball Attendance</title>
+    <script src="https://unpkg.com/htmx.org@1.9.2"></script>
+</head>
+<body>
+    <h1>Are you playing basketball today?</h1>
+    <form hx-post="/submit" hx-target="#players" hx-swap="outerHTML">
+        <input type="text" name="name" id="name" placeholder="Enter your name" required>
+        <button type="submit">Submit</button>
+    </form>
+    <div id="players" hx-get="/players" hx-trigger="load"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var name = getCookie("player_name");
+            if (name) {
+                document.getElementById("name").value = name;
+            }
+        });
+
+        function getCookie(name) {
+            var nameEQ = name + "=";
+            var ca = document.cookie.split(';');
+            for(var i=0;i < ca.length;i++) {
+                var c = ca[i];
+                while (c.charAt(0)==' ') c = c.substring(1,c.length);
+                if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+            }
+            return null;
+        }
+    </script>
+</body>
+</html>
