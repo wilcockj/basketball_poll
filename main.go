@@ -53,8 +53,8 @@ func main() {
 	}
 
 	r.HandleFunc("/", homeHandler).Methods("GET")
-	r.HandleFunc(basePath+"submit", submitHandler).Methods("POST")
-	r.HandleFunc(basePath+"players", playersHandler).Methods("GET")
+	r.HandleFunc("/submit", submitHandler).Methods("POST")
+	r.HandleFunc("/players", playersHandler).Methods("GET")
 
 	fmt.Println("Server is running on http://localhost:8098")
 	log.Fatal(http.ListenAndServe(":8098", r))
